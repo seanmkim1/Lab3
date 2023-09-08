@@ -6,8 +6,7 @@ format:
     embed-resources: true
 ---
 
-
-## Question 1: 
+## Question 1:
 
 ```{r}
 download.file(
@@ -38,7 +37,7 @@ There are 2,377,343 rows and 30 columns in the met dataset.
 str(met)
 ```
 
-# Question 4: Closer look at key variables: 
+# Question 4: Closer look at key variables:
 
 ```{r}
 table(met$year)
@@ -103,11 +102,15 @@ hist(met$wind.sp)
 ```
 
 ```{r}
-library(leaflet)
-leaflet(elev) %>%
-  addProviderTiles('OpenStreetMap') %>% 
-  addCircles(lat=~lat,lng=~lon, opacity=1, fillOpacity=1, radius=100)
+
 ```
+
+library(leaflet)
+leaflet(elev) %\>%
+
+addProviderTiles('OpenStreetMap') %\>% 
+
+addCircles(lat=\~lat,lng=\~lon, opacity=1, fillOpacity=1, radius=100)
 
 ```{r}
 library(lubridate)
@@ -123,7 +126,7 @@ For temp vs date, there appears to be variation within a day, likely reflecting 
 
 For wind vs date, there are two spikes in wind speed around Aug 18 and Aug 26.
 
-# Question 8: What questions about the data? 
+# Question 8: What questions about the data?
 
 Question: What is the relationship between elevation and wind speed in August?
 
@@ -162,4 +165,3 @@ abline(mod, lwd=2, col="red")
 ```
 
 Average wind speed increases with increasing elevation.
-
