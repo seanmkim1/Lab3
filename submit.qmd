@@ -1,28 +1,165 @@
 ---
-title: ""
-author: ""
+title: "Lab 3"
+author: "Sean Kim"
 format:
   html:
     embed-resources: true
 ---
 
-## Quarto
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+## Question 1: 
 
 ```{r}
-1 + 1
+download.file(
+  "https://raw.githubusercontent.com/USCbiostats/data-science-data/master/02_met/met_all.gz",
+  destfile = file.path("~", "Downloads", "met_all.gz"),
+  method   = "libcurl",
+  timeout  = 60
+)
+met <- data.table::fread(file.path("~", "Downloads", "met_all.gz"))
+
+library(tidyverse)
+library(data.table)
 ```
 
-You can add options to executable code like this
+# Question 2: How many columns, rows are there?
 
 ```{r}
-#| echo: false
-2 * 2
+dim(met)
+head(met)
+tail(met)
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+There are 2,377,343 rows and 30 columns in the met dataset.
+
+# Question 3: Looking at the variables
+
+```{r}
+str(met)
+```
+
+# Question 4: Closer look at key variables: 
+
+```{r}
+table(met$year)
+table(met$day)
+table(met$hour)
+summary(met$temp)
+summary(met$elev)
+summary(met$wind.sp)
+```
+
+```{r}
+met[met$elev==9999.0] <- NA
+summary(met$elev)
+```
+
+Highest weather station is 4113 meters, after replacing 9999.0 values with NA.
+
+```{r}
+met <- met[temp>-40]
+met2 <- met[order(temp)]
+head(met2)
+
+```
+
+# Question 5 - Check data against an external data source
+
+```{r}
+met <- met[temp>-15]
+met2 <- met[order(temp)]
+head(met2)
+```
+
+All temperatures colder than -15C were removed. Minimum temp -3C in the new dataset.
+
+```{r}
+max(met$elev)
+min(met$elev)
+```
+
+# 6. Summary Statistics
+
+```{r}
+elev <- met[elev==max(elev), ]
+summary(elev)
+```
+
+```{r}
+cor(elev$temp, elev$wind.sp, use="complete")
+cor(elev$temp, elev$hour, use="complete")
+cor(elev$wind.sp, elev$day, use="complete")
+cor(elev$wind.sp, elev$hour, use="complete")
+cor(elev$temp, elev$day, use="complete")
+```
+
+# Question 7: Exploratory Graphs
+
+```{r}
+hist(met$elev, breaks=100)
+hist(met$temp)
+hist(met$wind.sp)
+
+```
+
+```{r}
+library(leaflet)
+leaflet(elev) %>%
+  addProviderTiles('OpenStreetMap') %>% 
+  addCircles(lat=~lat,lng=~lon, opacity=1, fillOpacity=1, radius=100)
+```
+
+```{r}
+library(lubridate)
+elev$date <- with(elev, ymd_h(paste(year, month, day, hour, sep= ' ')))
+summary(elev$date)
+elev <- elev[order(date)]
+head(elev)
+plot(elev$date, elev$temp, type='l')
+plot(elev$date, elev$wind.sp, type='l')
+```
+
+For temp vs date, there appears to be variation within a day, likely reflecting the temperature differences between day and night, and overall temp seems range between 2-14C and remained similar in that trend throughout the month.
+
+For wind vs date, there are two spikes in wind speed around Aug 18 and Aug 26.
+
+# Question 8: What questions about the data? 
+
+Question: What is the relationship between elevation and wind speed in August?
+
+```{r}
+summary(met$wind.sp)
+met3 <- met[met$wind.sp < 36, ]
+dim(met3)
+met4 <- met3[order(met3$wind.sp)]
+head(met4)
+tail(met4)
+
+
+
+```
+
+```{r}
+met4_daily <- met4[, .(
+  wind.sp = mean(wind.sp),
+  lat  = mean(lat),
+  lon  = mean(lon),
+  elev = mean(elev)
+  ), by = c("USAFID", "day")][order(wind.sp)]
+head(met4_daily)
+tail(met4_daily)
+```
+
+```{r}
+met4_daily[, plot(elev, wind.sp, pch = 19, cex =0.5)]
+mod <- lm(wind.sp ~ elev, data = met4_daily)
+met4_daily[, plot(
+  elev, wind.sp, pch=19, cex=0.5, 
+  main = "Wind Speed and Elevation", 
+  xlab = "Elevation", ylab = "Wind Speed (mph)")
+  ]
+abline(mod, lwd=2, col="red")
+```
+
+Average wind speed increases with increasing elevation.
+
