@@ -10,12 +10,16 @@ format:
 
 ```{r}
 download.file(
-  "https://raw.githubusercontent.com/USCbiostats/data-science-data/master/02_met/met_all.gz",
-  destfile = file.path("~", "Downloads", "met_all.gz"),
-  method   = "libcurl",
-  timeout  = 60
-)
-met <- data.table::fread(file.path("~", "Downloads", "met_all.gz"))
+
+    "https://raw.githubusercontent.com/USCbiostats/data-science-data/master/02_met/met_all.gz",
+
+    destfile = "met_all.gz",
+
+    method   = "libcurl",
+
+    timeout  = 60 )
+
+met <- data.table::fread("met_all.gz")
 
 library(tidyverse)
 library(data.table)
@@ -102,15 +106,12 @@ hist(met$wind.sp)
 ```
 
 ```{r}
-
-```
-
 library(leaflet)
-leaflet(elev) %\>%
 
-addProviderTiles('OpenStreetMap') %\>% 
-
-addCircles(lat=\~lat,lng=\~lon, opacity=1, fillOpacity=1, radius=100)
+leaflet(elev) %>%
+  addProviderTiles('OpenStreetMap') %>% 
+  addCircles(lat=~lat,lng=~lon, opacity=1, fillOpacity=1, radius=100)
+```
 
 ```{r}
 library(lubridate)
