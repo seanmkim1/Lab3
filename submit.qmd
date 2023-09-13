@@ -23,6 +23,7 @@ met <- data.table::fread("met_all.gz")
 
 library(tidyverse)
 library(data.table)
+library(R.utils)
 ```
 
 # Question 2: How many columns, rows are there?
